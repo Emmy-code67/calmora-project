@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Create Account{% endblock %}
+{% block guest_content %}
+<div class="auth-wrapper">
+  <div class="auth-card fade-in">
+    <div class="text-center mb-4">
+      <span class="brand-dot d-inline-flex" style="width:52px;height:52px;font-size:1.5rem;"><i class="bi bi-flower2"></i></span>
+      <h3 class="fw-bold mt-3 mb-0">Start your journey</h3>
+      <p class="text-muted-soft">Create your free Calmora account</p>
+    </div>
+    <form method="POST" novalidate>
+      {{ form.hidden_tag() }}
+      <div class="mb-3">
+        {{ form.full_name.label(class="form-label") }}
+        {{ form.full_name(class="form-control", placeholder="Jane Doe") }}
+      </div>
+      <div class="mb-3">
+        {{ form.username.label(class="form-label") }}
+        {{ form.username(class="form-control", placeholder="jane_doe") }}
+        {% for e in form.username.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="mb-3">
+        {{ form.email.label(class="form-label") }}
+        {{ form.email(class="form-control", placeholder="jane@example.com") }}
+        {% for e in form.email.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="mb-3">
+        {{ form.password.label(class="form-label") }}
+        {{ form.password(class="form-control", placeholder="At least 8 characters") }}
+        {% for e in form.password.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="mb-3">
+        {{ form.confirm_password.label(class="form-label") }}
+        {{ form.confirm_password(class="form-control", placeholder="Repeat password") }}
+        {% for e in form.confirm_password.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+      </div>
+      {{ form.submit(class="btn btn-primary w-100 py-2") }}
+    </form>
+    <p class="text-center text-muted-soft small mt-4 mb-0">
+      Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

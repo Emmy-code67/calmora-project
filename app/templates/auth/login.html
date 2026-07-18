@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Log In{% endblock %}
+{% block guest_content %}
+<div class="auth-wrapper">
+  <div class="auth-card fade-in">
+    <div class="text-center mb-4">
+      <span class="brand-dot d-inline-flex" style="width:52px;height:52px;font-size:1.5rem;"><i class="bi bi-flower2"></i></span>
+      <h3 class="fw-bold mt-3 mb-0">Welcome back</h3>
+      <p class="text-muted-soft">Log in to continue your wellness journey</p>
+    </div>
+    <form method="POST" novalidate>
+      {{ form.hidden_tag() }}
+      <div class="mb-3">
+        {{ form.username.label(class="form-label") }}
+        {{ form.username(class="form-control", placeholder="username or email", autofocus=true) }}
+        {% for e in form.username.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="mb-3">
+        {{ form.password.label(class="form-label") }}
+        {{ form.password(class="form-control", placeholder="••••••••") }}
+        {% for e in form.password.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="form-check mb-3">
+        {{ form.remember_me(class="form-check-input") }}
+        {{ form.remember_me.label(class="form-check-label small") }}
+      </div>
+      {{ form.submit(class="btn btn-primary w-100 py-2") }}
+    </form>
+    <p class="text-center text-muted-soft small mt-4 mb-0">
+      Don't have an account? <a href="{{ url_for('auth.register') }}">Sign up</a>
+    </p>
+    <div class="divider"></div>
+    <p class="text-center text-muted-soft" style="font-size:.75rem;">
+      Demo credentials — <strong>demo</strong> / Demo1234!
+    </p>
+  </div>
+</div>
+{% endblock %}

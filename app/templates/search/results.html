@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% import "shared/macros.html" as macros %}
+{% block title %}Search{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <h3 class="fw-bold mb-1"><i class="bi bi-search me-2"></i>Global Search</h3>
+  <p class="text-muted-soft mb-3">Search across mood entries, journal, symptoms, medications, therapy, and habits</p>
+  <form method="GET" class="d-flex gap-2" style="max-width: 500px;">
+    <input type="search" name="q" value="{{ q }}" class="form-control" placeholder="Search everything in Calmora..." autofocus>
+    <button class="btn btn-primary"><i class="bi bi-search"></i></button>
+  </form>
+</div>
+
+{% if q %}
+  <p class="text-muted-soft small mb-4">{{ total }} result{{ 's' if total != 1 }} for "<strong>{{ q }}</strong>"</p>
+
+  {% if total == 0 %}
+    <div class="card-soft">{{ macros.empty_state('bi-search', 'No results found. Try a different keyword.') }}</div>
+  {% else %}
+
+  {% if results.mood %}
+  <div class="card-soft p-3 mb-3">
+    <h6 class="fw-bold mb-2"><i class="bi bi-emoji-smile me-2"></i>Mood Entries ({{ results.mood|length }})</h6>
+    {% for m in results.mood %}
+    <a href="{{ url_for('mood.list_moods') }}" class="d-block text-decoration-none text-reset py-2 border-bottom small">
+      {{ macros.mood_chip(m.mood_type) }} — {{ m.entry_date.strftime('%b %d, %Y') }} — {{ (m.notes or '')[:100] }}
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if results.journal %}
+  <div class="card-soft p-3 mb-3">
+    <h6 class="fw-bold mb-2"><i class="bi bi-journal-richtext me-2"></i>Journal Entries ({{ results.journal|length }})</h6>
+    {% for j in results.journal %}
+    <a href="{{ url_for('journal.view_entry', entry_id=j.id) }}" class="d-block text-decoration-none text-reset py-2 border-bottom small">
+      <strong>{{ j.title }}</strong> — {{ j.entry_date.strftime('%b %d, %Y') }} — {{ j.content[:100] }}...
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if results.symptoms %}
+  <div class="card-soft p-3 mb-3">
+    <h6 class="fw-bold mb-2"><i class="bi bi-clipboard2-pulse me-2"></i>Symptoms ({{ results.symptoms|length }})</h6>
+    {% for s in results.symptoms %}
+    <a href="{{ url_for('symptoms.list_symptoms') }}" class="d-block text-decoration-none text-reset py-2 border-bottom small">
+      <strong>{{ s.name }}</strong> — Severity {{ s.severity }}/5 — {{ s.entry_date.strftime('%b %d, %Y') }}
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if results.medications %}
+  <div class="card-soft p-3 mb-3">
+    <h6 class="fw-bold mb-2"><i class="bi bi-capsule me-2"></i>Medications ({{ results.medications|length }})</h6>
+    {% for m in results.medications %}
+    <a href="{{ url_for('medications.view_medication', med_id=m.id) }}" class="d-block text-decoration-none text-reset py-2 border-bottom small">
+      <strong>{{ m.name }}</strong> — {{ m.dosage or '' }} {{ m.frequency or '' }}
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if results.therapy %}
+  <div class="card-soft p-3 mb-3">
+    <h6 class="fw-bold mb-2"><i class="bi bi-people-fill me-2"></i>Therapy Appointments ({{ results.therapy|length }})</h6>
+    {% for a in results.therapy %}
+    <a href="{{ url_for('therapy.list_appointments') }}" class="d-block text-decoration-none text-reset py-2 border-bottom small">
+      <strong>{{ a.therapist_name }}</strong> — {{ a.appointment_date.strftime('%b %d, %Y') }} — {{ macros.status_badge(a.status) }}
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if results.habits %}
+  <div class="card-soft p-3 mb-3">
+    <h6 class="fw-bold mb-2"><i class="bi bi-check2-circle me-2"></i>Habits ({{ results.habits|length }})</h6>
+    {% for h in results.habits %}
+    <a href="{{ url_for('habits.list_habits') }}" class="d-block text-decoration-none text-reset py-2 border-bottom small">
+      <strong>{{ h.name }}</strong> — {{ h.frequency|capitalize }} — {{ h.description or '' }}
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% endif %}
+{% else %}
+  <div class="card-soft">{{ macros.empty_state('bi-search', 'Start typing to search across your entire Calmora account.') }}</div>
+{% endif %}
+{% endblock %}

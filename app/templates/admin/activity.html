@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% import "shared/macros.html" as macros %}
+{% block title %}Activity Log{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <a href="{{ url_for('admin.dashboard') }}" class="text-decoration-none small"><i class="bi bi-arrow-left me-1"></i>Back to Admin Dashboard</a>
+</div>
+<h3 class="fw-bold mb-4"><i class="bi bi-clock-history me-2"></i>System Activity Log</h3>
+
+<div class="card-soft p-3 mb-4">
+  <form method="GET" class="row g-2 align-items-end">
+    <div class="col-md-8">
+      <input type="text" name="q" class="form-control form-control-sm" value="{{ request.args.get('q','') }}" placeholder="Search actions or details...">
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-primary btn-sm w-100"><i class="bi bi-funnel"></i></button>
+    </div>
+  </form>
+</div>
+
+{% if logs %}
+<div class="table-responsive card-soft">
+  <table class="table table-soft mb-0">
+    <thead><tr><th>Time</th><th>User</th><th>Action</th><th>Details</th><th>IP</th></tr></thead>
+    <tbody>
+      {% for log in logs %}
+      <tr>
+        <td class="small text-muted-soft">{{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        <td class="small fw-semibold">{{ log.user.username if log.user else 'System' }}</td>
+        <td class="small">{{ log.action|replace('_',' ')|capitalize }}</td>
+        <td class="small text-muted-soft">{{ log.details or '—' }}</td>
+        <td class="small text-muted-soft">{{ log.ip_address or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{{ macros.pagination(pagination, 'admin.activity_log') }}
+{% else %}
+<div class="card-soft">{{ macros.empty_state('bi-clock-history', 'No activity recorded yet.') }}</div>
+{% endif %}
+{% endblock %}

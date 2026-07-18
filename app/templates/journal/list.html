@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% import "shared/macros.html" as macros %}
+{% block title %}Journal{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h3 class="fw-bold mb-1"><i class="bi bi-journal-richtext me-2"></i>Journal</h3>
+    <p class="text-muted-soft mb-0">A private space for your thoughts and reflections</p>
+  </div>
+  <div class="d-flex gap-2">
+    <div class="dropdown">
+      <button class="btn btn-soft dropdown-toggle" data-bs-toggle="dropdown"><i class="bi bi-download me-1"></i>Export</button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="{{ url_for('journal.export_entries', fmt='csv', **request.args.to_dict()) }}">CSV</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('journal.export_entries', fmt='xlsx', **request.args.to_dict()) }}">Excel</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('journal.export_entries', fmt='pdf', **request.args.to_dict()) }}">PDF</a></li>
+      </ul>
+    </div>
+    <a href="{{ url_for('journal.add_entry') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>New Entry</a>
+  </div>
+</div>
+
+<div class="card-soft p-3 mb-4">
+  <form method="GET" class="row g-2 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label small mb-1">Keyword</label>
+      <input type="text" name="q" class="form-control form-control-sm" value="{{ request.args.get('q','') }}" placeholder="Search title, content, tags...">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small mb-1">Mood Tag</label>
+      <select name="mood_tag" class="form-select form-select-sm">
+        <option value="">All</option>
+        {% for m in mood_types %}
+        <option value="{{ m }}" {{ 'selected' if request.args.get('mood_tag') == m }}>{{ m|capitalize }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small mb-1">From</label>
+      <input type="date" name="date_from" class="form-control form-control-sm" value="{{ request.args.get('date_from','') }}">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small mb-1">To</label>
+      <input type="date" name="date_to" class="form-control form-control-sm" value="{{ request.args.get('date_to','') }}">
+    </div>
+    <div class="col-md-1 form-check mt-4">
+      <input class="form-check-input" type="checkbox" name="favorites_only" value="1" id="favOnly" {{ 'checked' if request.args.get('favorites_only') == '1' }}>
+      <label class="form-check-label small" for="favOnly">★ Only</label>
+    </div>
+    <div class="col-md-1">
+      <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-funnel"></i></button>
+    </div>
+  </form>
+</div>
+
+{% if entries %}
+<div class="row g-3">
+  {% for e in entries %}
+  <div class="col-md-6 col-xl-4">
+    <div class="card-soft p-3 h-100 d-flex flex-column">
+      <div class="d-flex justify-content-between align-items-start">
+        <h6 class="fw-bold mb-1"><a href="{{ url_for('journal.view_entry', entry_id=e.id) }}" class="text-reset text-decoration-none">{{ e.title }}</a></h6>
+        <form method="POST" action="{{ url_for('journal.toggle_favorite', entry_id=e.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-sm p-0 border-0 bg-transparent" style="color:{{ '#FFB020' if e.is_favorite else 'var(--c-text-muted)' }};">
+            <i class="bi {{ 'bi-star-fill' if e.is_favorite else 'bi-star' }}"></i>
+          </button>
+        </form>
+      </div>
+      <p class="text-muted-soft small mb-2">{{ e.entry_date.strftime('%b %d, %Y') }} {% if e.mood_tag %}· {{ macros.mood_chip(e.mood_tag) }}{% endif %}</p>
+      <p class="small flex-grow-1">{{ e.content[:120] }}{{ '...' if e.content|length > 120 }}</p>
+      {% if e.tag_list %}
+      <div class="mb-2">
+        {% for t in e.tag_list %}<span class="badge bg-body-secondary text-muted-soft me-1">#{{ t }}</span>{% endfor %}
+      </div>
+      {% endif %}
+      <div class="d-flex gap-2 mt-auto">
+        <a href="{{ url_for('journal.edit_entry', entry_id=e.id) }}" class="btn btn-soft btn-sm flex-grow-1"><i class="bi bi-pencil"></i> Edit</a>
+        <form method="POST" action="{{ url_for('journal.delete_entry', entry_id=e.id) }}" onsubmit="return confirm('Delete this journal entry?');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-soft btn-sm text-danger"><i class="bi bi-trash"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{{ macros.pagination(pagination, 'journal.list_entries') }}
+{% else %}
+<div class="card-soft">
+  {{ macros.empty_state('bi-journal-x', 'No journal entries match your filters yet.', 'Write Your First Entry', url_for('journal.add_entry')) }}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% import "shared/macros.html" as macros %}
+{% block title %}Habits{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h3 class="fw-bold mb-1"><i class="bi bi-check2-circle me-2"></i>Habit Tracking</h3>
+    <p class="text-muted-soft mb-0">Build consistent wellness routines, one day at a time</p>
+  </div>
+  <div class="d-flex gap-2">
+    <div class="dropdown">
+      <button class="btn btn-soft dropdown-toggle" data-bs-toggle="dropdown"><i class="bi bi-download me-1"></i>Export</button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="{{ url_for('habits.export_habits', fmt='csv', **request.args.to_dict()) }}">CSV</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('habits.export_habits', fmt='xlsx', **request.args.to_dict()) }}">Excel</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('habits.export_habits', fmt='pdf', **request.args.to_dict()) }}">PDF</a></li>
+      </ul>
+    </div>
+    <a href="{{ url_for('habits.add_habit') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Habit</a>
+  </div>
+</div>
+
+<div class="card-soft p-3 mb-4">
+  <form method="GET" class="row g-2 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label small mb-1">Keyword</label>
+      <input type="text" name="q" class="form-control form-control-sm" value="{{ request.args.get('q','') }}" placeholder="Search habits...">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label small mb-1">Status</label>
+      <select name="status" class="form-select form-select-sm">
+        <option value="">All</option>
+        <option value="active" {{ 'selected' if request.args.get('status')=='active' }}>Active</option>
+        <option value="inactive" {{ 'selected' if request.args.get('status')=='inactive' }}>Inactive</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label small mb-1">Frequency</label>
+      <select name="frequency" class="form-select form-select-sm">
+        <option value="">All</option>
+        <option value="daily" {{ 'selected' if request.args.get('frequency')=='daily' }}>Daily</option>
+        <option value="weekly" {{ 'selected' if request.args.get('frequency')=='weekly' }}>Weekly</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-funnel"></i></button>
+    </div>
+  </form>
+</div>
+
+{% if habit_rows %}
+<div class="row g-3">
+  {% for row in habit_rows %}
+  <div class="col-md-6 col-xl-4">
+    <div class="card-soft p-3 h-100 d-flex flex-column">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <div style="width:40px;height:40px;border-radius:10px;background:{{ row.habit.color }}22;color:{{ row.habit.color }};display:flex;align-items:center;justify-content:center;font-size:1.1rem;">
+          <i class="bi {{ row.habit.icon }}"></i>
+        </div>
+        <div class="flex-grow-1">
+          <h6 class="fw-bold mb-0">{{ row.habit.name }}</h6>
+          <p class="text-muted-soft small mb-0">{{ row.habit.frequency|capitalize }} · 🔥 {{ row.streak }} day streak</p>
+        </div>
+      </div>
+      {% if row.habit.description %}<p class="small text-muted-soft">{{ row.habit.description }}</p>{% endif %}
+      <div class="mb-2">
+        <div class="d-flex justify-content-between small mb-1">
+          <span class="text-muted-soft">30-day completion</span><span class="fw-semibold">{{ row.rate }}%</span>
+        </div>
+        <div class="progress" style="height:6px;">
+          <div class="progress-bar" style="width:{{ row.rate }}%; background:{{ row.habit.color }};"></div>
+        </div>
+      </div>
+      <div class="d-flex gap-2 mt-auto pt-2">
+        <form method="POST" action="{{ url_for('habits.checkin', habit_id=row.habit.id) }}" class="flex-grow-1">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-sm w-100 {{ 'btn-success' if row.done_today else 'btn-soft' }}">
+            <i class="bi {{ 'bi-check-circle-fill' if row.done_today else 'bi-circle' }} me-1"></i>{{ 'Done Today' if row.done_today else 'Mark Done' }}
+          </button>
+        </form>
+        <a href="{{ url_for('habits.edit_habit', habit_id=row.habit.id) }}" class="btn btn-soft btn-sm"><i class="bi bi-pencil"></i></a>
+        <form method="POST" action="{{ url_for('habits.delete_habit', habit_id=row.habit.id) }}" onsubmit="return confirm('Delete this habit and its history?');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-soft btn-sm text-danger"><i class="bi bi-trash"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{{ macros.pagination(pagination, 'habits.list_habits') }}
+{% else %}
+<div class="card-soft">
+  {{ macros.empty_state('bi-check2-circle', 'No habits match your filters yet.', 'Add a Habit', url_for('habits.add_habit')) }}
+</div>
+{% endif %}
+{% endblock %}

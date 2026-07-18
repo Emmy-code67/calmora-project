@@ -1,0 +1,12 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="{% if current_user.is_authenticated %}mb-3{% else %}position-fixed top-0 start-50 translate-middle-x mt-3{% endif %}" style="{% if not current_user.is_authenticated %}z-index: 2000; width: 90%; max-width: 500px;{% endif %}">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'danger' else category }} alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}

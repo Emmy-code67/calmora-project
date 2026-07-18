@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Calmora{% endblock %} · Calmora</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <!-- Calmora custom styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body data-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}"
+      data-theme-pref="{{ current_user.theme_pref if current_user.is_authenticated else '' }}">
+
+{% if current_user.is_authenticated %}
+<div class="app-shell">
+  <!-- ============================= SIDEBAR ============================= -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-dot"><i class="bi bi-flower2"></i></span> Calmora
+    </div>
+
+    <div class="nav-section-label">Overview</div>
+    <nav class="nav flex-column">
+      <a class="nav-link {{ 'active' if request.endpoint == 'main.dashboard' }}" href="{{ url_for('main.dashboard') }}">
+        <i class="bi bi-grid-1x2-fill"></i> Dashboard
+      </a>
+      <a class="nav-link {{ 'active' if request.endpoint and request.endpoint.startswith('calendar_view.') }}" href="{{ url_for('calendar_view.calendar_home') }}">
+        <i class="bi bi-calendar3"></i> Calendar
+      </a>
+      <a class="nav-link {{ 'active' if request.endpoint and request.endpoint.startswith('analytics.') }}" href="{{ url_for('analytics.overview') }}">
+        <i class="bi bi-bar-chart-line-fill"></i> Analytics
+      </a>
+      <a class="nav-link {{ 'active' if request.endpoint and request.endpoint.startswith('search.') }}" href="{{ url_for('search.global_search') }}">
+        <i class="bi bi-search"></i> Search
+      </a>
+    </nav>
+
+    <div class="nav-section-label">Wellness Tracking</div>
+    <nav class="nav flex-column">
+      <a class="nav-link {{ 'active' if request.endpoint and request.endpoint.startswith('mood.') }}" href="{{ url_for('mood.list_moods') }}">
+        <i class="bi bi-emoji-smile"></i> Mood Tracker
+      </a>
+      <a class="nav-link {{ 'active' if request.endpoint and request.endpoint.startswith('journal.') }}" href="{{ url_for('journal.list_entries') }}">
+        <i class="bi bi-journal-richtext"></i> Journal
+      </a>
+      <a class="nav-link {{ 'active' if request.endpoint and request.endpoint.startswith('symptoms.') }}" href="{{ url_for('symptoms.list_symptoms') }}">
+        <i class="bi bi-clipboard2-pulse"></i> Symptoms
+      </a>
+      <a class="nav-link {{ 'active' if request.endpoint and request.endpoint.startswith('habits.') }}" href="{{ url_for('habits.list_habits') }}">
+        <i class="bi bi-check2-circle"></i> Habits
+      </a>
+    </nav>
+
+    <div class="nav-section-label">Care Management</div>
+    <nav class="nav flex-column">
+      <a class="nav-link {{ 'active' if request.endpoint and request.endpoint.startswith('medications.') }}" href="{{ url_for('medications.list_medications') }}">
+        <i class="bi bi-capsule"></i> Medications
+      </a>
+      <a class="nav-link {{ 'active' if request.endpoint and request.endpoint.startswith('therapy.') }}" href="{{ url_for('therapy.list_appointments') }}">
+        <i class="bi bi-people-fill"></i> Therapy
+      </a>
+    </nav>
+
+    {% if current_user.is_admin %}
+    <div class="nav-section-label">Administration</div>
+    <nav class="nav flex-column">
+      <a class="nav-link {{ 'active' if request.endpoint and request.endpoint.startswith('admin.') }}" href="{{ url_for('admin.dashboard') }}">
+        <i class="bi bi-shield-lock-fill"></i> Admin Panel
+      </a>
+    </nav>
+    {% endif %}
+
+    <div class="nav-section-label">Account</div>
+    <nav class="nav flex-column">
+      <a class="nav-link {{ 'active' if request.endpoint == 'auth.profile' }}" href="{{ url_for('auth.profile') }}">
+        <i class="bi bi-person-circle"></i> Profile
+      </a>
+      <a class="nav-link" href="{{ url_for('auth.logout') }}">
+        <i class="bi bi-box-arrow-right"></i> Log Out
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ============================= MAIN ============================= -->
+  <div class="main-content">
+    <header class="topbar">
+      <div class="d-flex align-items-center gap-2">
+        <button id="sidebarToggle" class="btn btn-soft btn-sm d-lg-none"><i class="bi bi-list"></i></button>
+        <form action="{{ url_for('search.global_search') }}" method="get" class="d-none d-md-block">
+          <div class="input-group">
+            <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search text-muted-soft"></i></span>
+            <input type="search" name="q" class="form-control border-start-0" placeholder="Search everything in Calmora…" style="width: 320px;">
+          </div>
+        </form>
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-soft btn-sm" onclick="calmoraToggleTheme()" title="Toggle theme">
+          <i id="themeToggleIcon" class="bi bi-moon-stars"></i>
+        </button>
+
+        <div class="dropdown">
+          <button class="btn btn-soft btn-sm position-relative" data-bs-toggle="dropdown">
+            <i class="bi bi-bell"></i>
+            {% if unread_notification_count > 0 %}
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:.6rem;">{{ unread_notification_count }}</span>
+            {% endif %}
+          </button>
+          <div class="dropdown-menu dropdown-menu-end p-2" style="width: 320px;">
+            <div class="d-flex justify-content-between align-items-center px-2 pb-2">
+              <strong>Notifications</strong>
+              <a href="{{ url_for('main.mark_all_read') }}" class="small text-decoration-none">Mark all read</a>
+            </div>
+            {% for n in current_user.notifications | sort(attribute='created_at', reverse=True) %}
+              {% if loop.index <= 6 %}
+              <div class="dropdown-item small rounded-3 mb-1 {{ '' if n.is_read else 'bg-body-secondary' }}" style="white-space: normal;">
+                <i class="bi bi-{{ 'bell' if n.category=='reminder' else 'info-circle' }} me-1"></i>{{ n.message }}
+                <div class="text-muted-soft" style="font-size:.7rem;">{{ n.created_at.strftime('%b %d, %H:%M') }}</div>
+              </div>
+              {% endif %}
+            {% else %}
+              <p class="text-muted-soft small px-2 mb-0">You're all caught up!</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <button class="btn btn-soft btn-sm d-flex align-items-center gap-2" data-bs-toggle="dropdown">
+            <img src="{{ url_for('static', filename='img/avatars/' + current_user.avatar) if current_user.avatar != 'default.png' else 'https://api.dicebear.com/7.x/notionists/svg?seed=' + current_user.username }}"
+                 alt="avatar" width="26" height="26" class="rounded-circle" style="object-fit:cover;">
+            <span class="d-none d-md-inline">{{ current_user.full_name or current_user.username }}</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}"><i class="bi bi-person me-2"></i>Profile</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('auth.change_password') }}"><i class="bi bi-key me-2"></i>Change Password</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Log Out</a></li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-body fade-in">
+      {% include "shared/flashes.html" %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% else %}
+  {% include "shared/flashes.html" %}
+  {% block guest_content %}{% endblock %}
+{% endif %}
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
