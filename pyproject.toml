@@ -1,2 +1,5 @@
+[project]
+name = "calmora"
+version = "0.1.0"
 [tool.vercel]
 entrypoint = "run:app"
