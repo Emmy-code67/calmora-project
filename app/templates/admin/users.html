@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% import "shared/macros.html" as macros %}
+{% block title %}Manage Users{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <a href="{{ url_for('admin.dashboard') }}" class="text-decoration-none small"><i class="bi bi-arrow-left me-1"></i>Back to Admin Dashboard</a>
+</div>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <h3 class="fw-bold mb-0"><i class="bi bi-people-fill me-2"></i>Manage Users</h3>
+</div>
+
+<div class="card-soft p-3 mb-4">
+  <form method="GET" class="row g-2 align-items-end">
+    <div class="col-md-6">
+      <label class="form-label small mb-1">Search</label>
+      <input type="text" name="q" class="form-control form-control-sm" value="{{ request.args.get('q','') }}" placeholder="Username, email, or name...">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label small mb-1">Role</label>
+      <select name="role" class="form-select form-select-sm">
+        <option value="">All</option>
+        <option value="admin" {{ 'selected' if request.args.get('role')=='admin' }}>Admin</option>
+        <option value="user" {{ 'selected' if request.args.get('role')=='user' }}>User</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <button class="btn btn-primary btn-sm w-100"><i class="bi bi-funnel"></i> Filter</button>
+    </div>
+  </form>
+</div>
+
+<div class="table-responsive card-soft">
+  <table class="table table-soft mb-0 align-middle">
+    <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th class="text-end">Actions</th></tr></thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td class="d-flex align-items-center gap-2">
+          <img src="https://api.dicebear.com/7.x/notionists/svg?seed={{ u.username }}" width="28" height="28" class="rounded-circle">
+          <span class="fw-semibold small">{{ u.full_name or u.username }}</span>
+        </td>
+        <td class="small">{{ u.email }}</td>
+        <td><span class="badge {{ 'bg-primary' if u.role=='admin' else 'bg-body-secondary text-muted-soft' }}">{{ u.role }}</span></td>
+        <td>{{ macros.status_badge('active' if u.is_active_account else 'inactive') }}</td>
+        <td class="small text-muted-soft">{{ u.created_at.strftime('%b %d, %Y') }}</td>
+        <td class="text-end">
+          {% if u.id != current_user.id %}
+          <form method="POST" action="{{ url_for('admin.toggle_user_role', user_id=u.id) }}" class="d-inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-soft" title="Toggle role"><i class="bi bi-shield"></i></button>
+          </form>
+          <form method="POST" action="{{ url_for('admin.toggle_user_active', user_id=u.id) }}" class="d-inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-soft" title="Toggle active"><i class="bi {{ 'bi-toggle-on' if u.is_active_account else 'bi-toggle-off' }}"></i></button>
+          </form>
+          <form method="POST" action="{{ url_for('admin.delete_user', user_id=u.id) }}" class="d-inline" onsubmit="return confirm('Delete this user and all their data?');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-soft text-danger" title="Delete"><i class="bi bi-trash"></i></button>
+          </form>
+          {% else %}
+          <span class="text-muted-soft small">You</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{{ macros.pagination(pagination, 'admin.user_list') }}
+{% endblock %}

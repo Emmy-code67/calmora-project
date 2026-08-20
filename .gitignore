@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+instance/*.db
+instance/*.sqlite3
+.env
+.DS_Store
+app/static/img/avatars/*
+!app/static/img/avatars/.gitkeep
+*.egg-info/
+.pytest_cache/

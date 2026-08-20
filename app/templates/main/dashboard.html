@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h3 class="fw-bold mb-1">Hi {{ (current_user.full_name or current_user.username).split(' ')[0] }}, how are you feeling today? 🌤️</h3>
+    <p class="text-muted-soft mb-0">Here's your wellness snapshot for {{ today.strftime('%A, %B %d') }}</p>
+  </div>
+  <a href="{{ url_for('mood.add_mood') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Log Mood</a>
+</div>
+
+<!-- ================= SUMMARY CARDS ================= -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: linear-gradient(135deg,#6C63FF,#8B84FF);"><i class="bi bi-emoji-smile"></i></div>
+      <div class="stat-value">{{ avg_mood_score if avg_mood_score is not none else '—' }}</div>
+      <div class="stat-label">Avg. Mood Score (7d)</div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: linear-gradient(135deg,#00C2A8,#24C38C);"><i class="bi bi-capsule"></i></div>
+      <div class="stat-value">{{ adherence if adherence is not none else '—' }}{{ '%' if adherence is not none }}</div>
+      <div class="stat-label">Medication Adherence (30d)</div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: linear-gradient(135deg,#FFB020,#FF7A59);"><i class="bi bi-check2-circle"></i></div>
+      <div class="stat-value">{{ avg_habit_rate if avg_habit_rate is not none else '—' }}{{ '%' if avg_habit_rate is not none }}</div>
+      <div class="stat-label">Habit Completion (30d)</div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: linear-gradient(135deg,#FF5A6E,#E85D75);"><i class="bi bi-clipboard2-pulse"></i></div>
+      <div class="stat-value">{{ symptom_count_month }}</div>
+      <div class="stat-label">Symptoms Logged (30d)</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Mood trend chart -->
+  <div class="col-lg-8">
+    <div class="card-soft p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0">Mood Trend — Last 14 Days</h6>
+        <a href="{{ url_for('analytics.overview') }}" class="small text-decoration-none">Full analytics <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <canvas id="moodTrendChart" height="110"></canvas>
+    </div>
+
+    <div class="card-soft p-4 mt-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0">Habit Progress</h6>
+        <a href="{{ url_for('habits.list_habits') }}" class="small text-decoration-none">Manage habits <i class="bi bi-arrow-right"></i></a>
+      </div>
+      {% if habit_data %}
+        {% for hd in habit_data %}
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div style="width:38px;height:38px;border-radius:10px;background:{{ hd.habit.color }}22;color:{{ hd.habit.color }};display:flex;align-items:center;justify-content:center;">
+            <i class="bi {{ hd.habit.icon }}"></i>
+          </div>
+          <div class="flex-grow-1">
+            <div class="d-flex justify-content-between">
+              <span class="fw-semibold small">{{ hd.habit.name }}</span>
+              <span class="small text-muted-soft">{{ hd.rate }}% · 🔥 {{ hd.streak }}d streak</span>
+            </div>
+            <div class="progress" style="height:6px;">
+              <div class="progress-bar" style="width:{{ hd.rate }}%; background:{{ hd.habit.color }};"></div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        {% import "shared/macros.html" as macros %}
+        {{ macros.empty_state('bi-check2-circle', 'No habits yet — start building healthy routines.', 'Add a Habit', url_for('habits.add_habit')) }}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Side column -->
+  <div class="col-lg-4">
+    <div class="card-soft p-4 mb-4">
+      <h6 class="fw-bold mb-3"><i class="bi bi-calendar-heart me-2"></i>Upcoming Therapy</h6>
+      {% if upcoming_appointments %}
+        {% for appt in upcoming_appointments %}
+        <div class="d-flex justify-content-between align-items-start mb-3 pb-3 border-bottom">
+          <div>
+            <div class="fw-semibold small">{{ appt.therapist_name }}</div>
+            <div class="text-muted-soft small">{{ appt.session_type or 'Session' }} · {{ appt.location }}</div>
+          </div>
+          <div class="text-end">
+            <div class="small fw-semibold">{{ appt.appointment_date.strftime('%b %d') }}</div>
+            <div class="text-muted-soft small">{{ appt.appointment_time.strftime('%I:%M %p') }}</div>
+          </div>
+        </div>
+        {% endfor %}
+        <a href="{{ url_for('therapy.list_appointments') }}" class="btn btn-soft btn-sm w-100">View All</a>
+      {% else %}
+        {% import "shared/macros.html" as macros %}
+        {{ macros.empty_state('bi-calendar-x', 'No upcoming sessions scheduled.', 'Schedule Session', url_for('therapy.add_appointment')) }}
+      {% endif %}
+    </div>
+
+    <div class="card-soft p-4">
+      <h6 class="fw-bold mb-3"><i class="bi bi-journal-richtext me-2"></i>Recent Journal Entries</h6>
+      {% if recent_journals %}
+        {% for j in recent_journals %}
+        <a href="{{ url_for('journal.view_entry', entry_id=j.id) }}" class="d-block text-decoration-none text-reset mb-3 pb-3 border-bottom">
+          <div class="fw-semibold small">{{ j.title }}</div>
+          <div class="text-muted-soft small">{{ j.entry_date.strftime('%b %d, %Y') }}</div>
+        </a>
+        {% endfor %}
+        <a href="{{ url_for('journal.list_entries') }}" class="btn btn-soft btn-sm w-100">View All</a>
+      {% else %}
+        {% import "shared/macros.html" as macros %}
+        {{ macros.empty_state('bi-journal-x', 'No journal entries yet.', 'Write Entry', url_for('journal.add_entry')) }}
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+  const ctx = document.getElementById('moodTrendChart');
+  const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: {{ trend_labels | tojson }},
+      datasets: [{
+        label: 'Emotional Score',
+        data: {{ trend_values | tojson }},
+        borderColor: '#6C63FF',
+        backgroundColor: 'rgba(108,99,255,0.12)',
+        fill: true,
+        tension: 0.4,
+        spanGaps: true,
+        pointRadius: 3,
+        pointBackgroundColor: '#6C63FF'
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { suggestedMin: -5, suggestedMax: 5, grid: { color: 'rgba(128,128,128,0.1)' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+</script>
+{% endblock %}

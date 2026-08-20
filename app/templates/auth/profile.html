@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="fw-bold mb-1">Your Profile</h3>
+    <p class="text-muted-soft mb-0">Manage your personal information and preferences</p>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card-soft p-4 text-center">
+      <img src="{{ url_for('static', filename='img/avatars/' + current_user.avatar) if current_user.avatar != 'default.png' else 'https://api.dicebear.com/7.x/notionists/svg?seed=' + current_user.username }}"
+           class="rounded-circle mx-auto mb-3" width="96" height="96" style="object-fit:cover;">
+      <h5 class="fw-bold mb-0">{{ current_user.full_name or current_user.username }}</h5>
+      <p class="text-muted-soft small">@{{ current_user.username }}</p>
+      <span class="badge bg-primary-subtle text-primary-emphasis">{{ current_user.role|capitalize }}</span>
+      <div class="divider"></div>
+      <p class="small text-muted-soft mb-1"><i class="bi bi-envelope me-2"></i>{{ current_user.email }}</p>
+      <p class="small text-muted-soft mb-1"><i class="bi bi-clock me-2"></i>Joined {{ current_user.created_at.strftime('%B %Y') }}</p>
+      <a href="{{ url_for('auth.change_password') }}" class="btn btn-soft btn-sm w-100 mt-3"><i class="bi bi-key me-1"></i> Change Password</a>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card-soft p-4">
+      <h5 class="fw-bold mb-3">Edit Details</h5>
+      <form method="POST" enctype="multipart/form-data" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="row g-3">
+          <div class="col-md-6">
+            {{ form.full_name.label(class="form-label") }}
+            {{ form.full_name(class="form-control") }}
+          </div>
+          <div class="col-md-6">
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control") }}
+            {% for e in form.email.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-md-6">
+            {{ form.timezone.label(class="form-label") }}
+            {{ form.timezone(class="form-control", placeholder="e.g. Africa/Accra") }}
+          </div>
+          <div class="col-md-6">
+            {{ form.avatar.label(class="form-label") }}
+            {{ form.avatar(class="form-control") }}
+          </div>
+          <div class="col-12">
+            {{ form.bio.label(class="form-label") }}
+            {{ form.bio(class="form-control", rows=4, placeholder="A little about you...") }}
+          </div>
+        </div>
+        <div class="mt-4">
+          {{ form.submit(class="btn btn-primary px-4") }}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

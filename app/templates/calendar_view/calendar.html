@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Calendar{% endblock %}
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h3 class="fw-bold mb-1"><i class="bi bi-calendar3 me-2"></i>Calendar</h3>
+    <p class="text-muted-soft mb-0">Every mood, journal entry, symptom, medication, and session in one view</p>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    {% for type, color in event_colors.items() %}
+    <span class="small text-muted-soft"><span class="calendar-legend-dot" style="background:{{ color }};"></span>{{ type|capitalize }}</span>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card-soft p-3">
+  <div id="calmoraCalendar"></div>
+</div>
+
+<div class="modal fade" id="eventDetailModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background: var(--c-surface); color: var(--c-text);">
+      <div class="modal-header"><h6 class="modal-title fw-bold" id="eventModalTitle">Event</h6>
+        <button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" id="eventModalBody"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const calendarEl = document.getElementById('calmoraCalendar');
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth',
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+    },
+    height: 'auto',
+    editable: true,
+    dayMaxEvents: 3,
+    events: function (info, successCallback, failureCallback) {
+      fetch(`{{ url_for('calendar_view.events_feed') }}?start=${info.startStr}&end=${info.endStr}`)
+        .then(res => res.json())
+        .then(data => successCallback(data))
+        .catch(err => failureCallback(err));
+    },
+    eventClick: function (info) {
+      const props = info.event.extendedProps;
+      document.getElementById('eventModalTitle').textContent = info.event.title;
+      document.getElementById('eventModalBody').innerHTML =
+        `<p class="mb-1"><strong>Type:</strong> ${props.type}</p>` +
+        `<p class="mb-1"><strong>Date:</strong> ${info.event.start.toLocaleDateString()}</p>` +
+        (props.status ? `<p class="mb-0"><strong>Status:</strong> ${props.status}</p>` : '');
+      new bootstrap.Modal(document.getElementById('eventDetailModal')).show();
+    },
+    eventDrop: function (info) {
+      const props = info.event.extendedProps;
+      if (!props.editable) { info.revert(); return; }
+      const [type, id] = info.event.id.split('-');
+      fetch(`/calendar/events/${type}/${id}/move`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify({ date: info.event.startStr })
+      }).then(res => res.json()).then(data => {
+        if (!data.success) info.revert();
+      }).catch(() => info.revert());
+    }
+  });
+
+  calendar.render();
+});
+</script>
+{% endblock %}

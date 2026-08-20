@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card-soft p-4">
+      <h5 class="fw-bold mb-4"><i class="bi bi-clipboard2-pulse me-2"></i>{{ title }}</h5>
+      <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="row g-3">
+          <div class="col-md-6">
+            {{ form.entry_date.label(class="form-label") }}
+            {{ form.entry_date(class="form-control") }}
+          </div>
+          <div class="col-md-6">
+            {{ form.category.label(class="form-label") }}
+            {{ form.category(class="form-select") }}
+          </div>
+          <div class="col-md-8">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control", placeholder="e.g. Headache, Racing thoughts") }}
+            {% for e in form.name.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-md-4">
+            {{ form.severity.label(class="form-label") }}
+            {{ form.severity(class="form-control") }}
+            {% for e in form.severity.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-md-6">
+            {{ form.duration_minutes.label(class="form-label") }}
+            {{ form.duration_minutes(class="form-control") }}
+          </div>
+          <div class="col-md-6">
+            {{ form.triggers.label(class="form-label") }}
+            {{ form.triggers(class="form-control", placeholder="e.g. poor sleep, work stress") }}
+          </div>
+          <div class="col-12">
+            {{ form.notes.label(class="form-label") }}
+            {{ form.notes(class="form-control", rows=4) }}
+          </div>
+        </div>
+        <div class="mt-4 d-flex gap-2">
+          {{ form.submit(class="btn btn-primary px-4") }}
+          <a href="{{ url_for('symptoms.list_symptoms') }}" class="btn btn-soft px-4">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
