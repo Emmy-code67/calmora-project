@@ -26,7 +26,7 @@ class Config:
 
     # SQLite database lives inside /instance so it is never committed to VCS.
     SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "CALMORA_DATABASE_URL",
+        "DATABASE_URL",
         f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'calmora.db')}",
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
