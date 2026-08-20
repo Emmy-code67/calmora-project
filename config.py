@@ -11,7 +11,12 @@ import os
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
-
+def _normalize_db_url(url: str) -> str:
+    """Some providers (Heroku-style) hand out 'postgres://' URLs, but
+    SQLAlchemy 1.4+ requires the 'postgresql://' scheme."""
+    if url and url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql://", 1)
+    return url
 class Config:
     """Base configuration shared by every environment."""
 

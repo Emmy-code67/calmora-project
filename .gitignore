@@ -12,3 +12,4 @@ app/static/img/avatars/*
 !app/static/img/avatars/.gitkeep
 *.egg-info/
 .pytest_cache/
+
