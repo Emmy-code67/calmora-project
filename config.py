@@ -11,12 +11,15 @@ import os
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
+
 def _normalize_db_url(url: str) -> str:
     """Some providers (Heroku-style) hand out 'postgres://' URLs, but
     SQLAlchemy 1.4+ requires the 'postgresql://' scheme."""
     if url and url.startswith("postgres://"):
         url = url.replace("postgres://", "postgresql://", 1)
     return url
+
+
 class Config:
     """Base configuration shared by every environment."""
 
@@ -24,12 +27,24 @@ class Config:
     # In production this MUST be overridden via the CALMORA_SECRET_KEY env var.
     SECRET_KEY = os.environ.get("CALMORA_SECRET_KEY", "dev-secret-key-change-me")
 
-    # SQLite database lives inside /instance so it is never committed to VCS.
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "DATABASE_URL",
-        f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'calmora.db')}",
+    # Falls back to local SQLite for dev; use Supabase's pooled Postgres URL in production.
+    SQLALCHEMY_DATABASE_URI = _normalize_db_url(
+        os.environ.get(
+            "DATABASE_URL",
+            f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'calmora.db')}",
+        )
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # Important for serverless: keep the pool small and recycle connections
+    # aggressively. Supabase's pooler (pgbouncer) handles the heavy lifting,
+    # but each function instance should still only hold a couple of connections.
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_size": 1,
+        "max_overflow": 2,
+        "pool_recycle": 300,
+        "pool_pre_ping": True,
+    }
 
     # Flask-WTF CSRF protection is on globally by default; explicit for clarity.
     WTF_CSRF_ENABLED = True
@@ -57,6 +72,7 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    SQLALCHEMY_ENGINE_OPTIONS = {}
     WTF_CSRF_ENABLED = False
 
 
@@ -66,3 +82,4 @@ config_map = {
     "testing": TestingConfig,
     "default": DevelopmentConfig,
 }
+
