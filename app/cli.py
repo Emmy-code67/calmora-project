@@ -4,6 +4,10 @@ Calmora - CLI Commands
 Custom `flask` CLI commands:
     flask init-db        create all tables
     flask seed-demo       populate with a realistic demo dataset
+
+Run these locally against whatever DATABASE_URL you have exported —
+point it at your Supabase connection string to set up production data,
+or leave it unset to use local SQLite for development.
 """
 
 import random

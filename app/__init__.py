@@ -17,15 +17,33 @@ from config import config_map
 from app.extensions import db, login_manager, csrf, migrate
 
 
+def _ensure_dir(path):
+    """Create a directory if possible, but never crash if it can't be.
+
+    Serverless platforms (Vercel, AWS Lambda, etc.) deploy the app onto a
+    read-only filesystem outside of /tmp. Folders that aren't already part
+    of the deployed bundle (e.g. an empty `instance/` directory, which git
+    doesn't track) can't be created at runtime there. Locally, and on
+    traditional hosts with a writable disk, this behaves exactly like a
+    normal os.makedirs(exist_ok=True) call.
+    """
+    try:
+        os.makedirs(path, exist_ok=True)
+    except OSError:
+        pass
+
+
 def create_app(config_name=None):
     app = Flask(__name__, instance_relative_config=True)
 
     config_name = config_name or os.environ.get("FLASK_ENV", "development")
     app.config.from_object(config_map.get(config_name, config_map["default"]))
 
-    # Ensure instance & upload folders exist
-    os.makedirs(app.instance_path, exist_ok=True)
-    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+    # These are no-ops if the filesystem is read-only (e.g. on Vercel) — see
+    # _ensure_dir's docstring. On Vercel you should be using Postgres/Supabase
+    # (DATABASE_URL) rather than SQLite, so a missing instance/ folder is fine.
+    _ensure_dir(app.instance_path)
+    _ensure_dir(app.config["UPLOAD_FOLDER"])
 
     # --- Bind extensions ---------------------------------------------------
     db.init_app(app)

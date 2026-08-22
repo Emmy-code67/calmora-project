@@ -3,8 +3,7 @@ Calmora - Shared Utilities
 --------------------------
 Small reusable helpers used across blueprints: role-based access control,
 activity logging for the admin dashboard, and generic filter/pagination
-helpers so every module (mood, journal, symptoms...) doesn't reimplement
-the same query logic.
+helpers so every module doesn't reimplement the same query logic.
 """
 
 from functools import wraps
@@ -28,7 +27,9 @@ def admin_required(view_func):
 
 
 def log_activity(action: str, details: str = "", user_id=None):
-    """Write a row to the ActivityLog table (used by the admin dashboard)."""
+    """Write a row to the ActivityLog table (used by the admin dashboard).
+    Wrapped in try/except so a logging failure never breaks the actual
+    user-facing action that triggered it."""
     try:
         uid = user_id or (current_user.id if current_user.is_authenticated else None)
         entry = ActivityLog(
@@ -58,3 +59,4 @@ def get_page_arg():
         return max(1, int(request.args.get("page", 1)))
     except (TypeError, ValueError):
         return 1
+    

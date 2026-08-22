@@ -21,7 +21,6 @@ from reportlab.lib.units import inch
 
 
 def export_csv(rows: list[dict], filename: str):
-    """rows: list of dicts with identical keys -> CSV file download."""
     if not rows:
         rows = [{"info": "No data available"}]
     buffer = io.StringIO()
