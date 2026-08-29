@@ -4,7 +4,8 @@ Calmora - Application Configuration
 Centralized configuration using the standard Flask config-object pattern.
 Educational note: keeping config in one place (instead of scattering
 os.environ calls through the codebase) makes it trivial to swap between
-Development / Testing / Production setups.
+Development / Testing / Production setups, and between SQLite (local dev)
+and Postgres/Supabase (production / serverless deployments).
 """
 
 import os
@@ -27,18 +28,21 @@ class Config:
     # In production this MUST be overridden via the CALMORA_SECRET_KEY env var.
     SECRET_KEY = os.environ.get("CALMORA_SECRET_KEY", "dev-secret-key-change-me")
 
-    # Falls back to local SQLite for dev; use Supabase's pooled Postgres URL in production.
+    # Falls back to local SQLite for development. In production, set
+    # DATABASE_URL to your Supabase pooled connection string
+    # (Supabase dashboard -> Settings -> Database -> Connection pooling, port 6543).
     SQLALCHEMY_DATABASE_URI = _normalize_db_url(
         os.environ.get(
-            "CALMORA_DATABASE_URL",
+            "DATABASE_URL",
             f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'calmora.db')}",
         )
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # Important for serverless: keep the pool small and recycle connections
-    # aggressively. Supabase's pooler (pgbouncer) handles the heavy lifting,
-    # but each function instance should still only hold a couple of connections.
+    # Important for serverless (Vercel): keep the pool small and recycle
+    # connections aggressively. Supabase's pooler (pgbouncer) handles the
+    # heavy lifting, but each function instance should still only hold a
+    # couple of connections at most.
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_size": 1,
         "max_overflow": 2,
@@ -52,7 +56,11 @@ class Config:
     # Pagination defaults used across all list views.
     ITEMS_PER_PAGE = 10
 
-    # Uploaded avatar images (must live inside app/static so url_for('static', ...) can serve them)
+    # Uploaded avatar images (must live inside app/static so url_for('static', ...)
+    # can serve them). NOTE: on read-only serverless filesystems (Vercel), writes
+    # here will fail gracefully rather than crash — see app/auth/routes.py. For a
+    # production-grade solution, point this at a cloud bucket (e.g. Supabase
+    # Storage) instead of local disk.
     UPLOAD_FOLDER = os.path.join(BASE_DIR, "app", "static", "img", "avatars")
     MAX_CONTENT_LENGTH = 2 * 1024 * 1024  # 2 MB max upload
 
@@ -72,7 +80,7 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
-    SQLALCHEMY_ENGINE_OPTIONS = {}
+    SQLALCHEMY_ENGINE_OPTIONS = {}  # pool options above don't apply to SQLite memory engine
     WTF_CSRF_ENABLED = False
 
 

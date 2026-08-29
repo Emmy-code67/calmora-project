@@ -13,3 +13,4 @@ class MoodForm(FlaskForm):
     sleep_hours = FloatField("Sleep (hours)", validators=[Optional(), NumberRange(min=0, max=24)])
     notes = TextAreaField("Notes", validators=[Optional(), Length(max=1000)])
     submit = SubmitField("Save Mood Entry")
+    

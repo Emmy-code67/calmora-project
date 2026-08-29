@@ -90,10 +90,23 @@ def profile():
 
         file = form.avatar.data
         if file:
-            ext = os.path.splitext(secure_filename(file.filename))[1]
-            filename = f"{uuid.uuid4().hex}{ext}"
-            file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
-            current_user.avatar = filename
+            # On serverless platforms (Vercel) the filesystem is read-only
+            # outside /tmp, so writing an uploaded avatar to disk will fail.
+            # Rather than crash the whole request, we catch that and let the
+            # user know their other profile changes still saved. A production
+            # deployment should point this at a cloud bucket (e.g. Supabase
+            # Storage) instead of local disk — see UPLOAD_FOLDER in config.py.
+            try:
+                ext = os.path.splitext(secure_filename(file.filename))[1]
+                filename = f"{uuid.uuid4().hex}{ext}"
+                file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
+                current_user.avatar = filename
+            except OSError:
+                flash(
+                    "Your other changes were saved, but profile picture uploads aren't "
+                    "available on this deployment yet.",
+                    "warning",
+                )
 
         db.session.commit()
         log_activity("profile_updated", f"{current_user.username} updated profile")

@@ -34,7 +34,6 @@ def dashboard():
     week_ago = today - timedelta(days=7)
     month_ago = today - timedelta(days=30)
 
-    # --- Summary card metrics -------------------------------------------------
     mood_this_week = MoodEntry.query.filter(
         MoodEntry.user_id == uid, MoodEntry.entry_date >= week_ago
     ).all()
@@ -76,7 +75,6 @@ def dashboard():
         round(sum(h["rate"] for h in habit_data) / len(habit_data), 1) if habit_data else None
     )
 
-    # --- 14-day mood trend for the mini chart --------------------------------
     trend_days = [today - timedelta(days=i) for i in range(13, -1, -1)]
     trend_map = {}
     for m in MoodEntry.query.filter(

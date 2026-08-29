@@ -1,9 +1,3 @@
-"""
-Calmora - Auth Forms
---------------------
-Flask-WTF forms provide server-side validation + automatic CSRF protection.
-"""
-
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, SelectField
@@ -54,3 +48,4 @@ class ChangePasswordForm(FlaskForm):
         "Confirm New Password", validators=[DataRequired(), EqualTo("new_password", message="Passwords must match.")]
     )
     submit = SubmitField("Update Password")
+    
