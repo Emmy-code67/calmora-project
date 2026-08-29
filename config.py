@@ -30,7 +30,7 @@ class Config:
     # Falls back to local SQLite for dev; use Supabase's pooled Postgres URL in production.
     SQLALCHEMY_DATABASE_URI = _normalize_db_url(
         os.environ.get(
-            "SUPABASE_URL",
+            "CALMORA_DATABASE_URL",
             f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'calmora.db')}",
         )
     )
