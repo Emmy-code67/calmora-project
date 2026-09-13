@@ -31,6 +31,8 @@ def register():
             username=form.username.data.strip(),
             email=form.email.data.strip().lower(),
             full_name=form.full_name.data.strip(),
+            age=form.age.data,
+            gender=form.gender.data,
         )
         user.set_password(form.password.data)
         db.session.add(user)

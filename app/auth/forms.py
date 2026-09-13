@@ -1,19 +1,46 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, SelectField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, IntegerField, SelectField
+from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError, NumberRange
 
 from app.models import User
-
-
 class RegisterForm(FlaskForm):
     username = StringField("Username", validators=[DataRequired(), Length(min=3, max=64)])
     full_name = StringField("Full Name", validators=[Length(max=120)])
-    email = StringField("Email", validators=[DataRequired(), Email()])
-    password = PasswordField("Password", validators=[DataRequired(), Length(min=8, message="Password must be at least 8 characters.")])
-    confirm_password = PasswordField(
-        "Confirm Password", validators=[DataRequired(), EqualTo("password", message="Passwords must match.")]
+
+    age = IntegerField(
+        "Age",
+        validators=[DataRequired(), NumberRange(min=1, max=120)]
     )
+
+    gender = SelectField(
+        "Gender",
+        choices=[
+            ("", "Select gender"),
+            ("female", "Female"),
+            ("male", "Male"),
+        ],
+        validators=[DataRequired()]
+    )
+
+    email = StringField("Email", validators=[DataRequired(), Email()])
+
+    password = PasswordField(
+        "Password",
+        validators=[
+            DataRequired(),
+            Length(min=8, message="Password must be at least 8 characters.")
+        ]
+    )
+
+    confirm_password = PasswordField(
+        "Confirm Password",
+        validators=[
+            DataRequired(),
+            EqualTo("password", message="Passwords must match.")
+        ]
+    )
+
     submit = SubmitField("Create Account")
 
     def validate_username(self, field):
