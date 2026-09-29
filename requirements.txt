@@ -31,3 +31,4 @@ typing_extensions
 tzdata
 Werkzeug
 WTForms
+psycopg[binary]
