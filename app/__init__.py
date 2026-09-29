@@ -34,7 +34,11 @@ def _ensure_dir(path):
 
 
 def create_app(config_name=None):
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__)
+
+    if os.environ.get("VERCEL") == "1":
+     app.instance_path = "/tmp/calmora_instance"
+     os.makedirs(app.instance_path, exist_ok=True)
 
     config_name = config_name or os.environ.get("FLASK_ENV", "development")
     app.config.from_object(config_map.get(config_name, config_map["default"]))
