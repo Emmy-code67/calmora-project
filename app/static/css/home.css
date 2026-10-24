@@ -1,0 +1,43 @@
+/* Calmora - landing page styles (builds on the tokens in style.css) */
+html { scroll-behavior: smooth; }
+.home-container { width: 100%; max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+
+.home-nav { position: sticky; top: 0; z-index: 20; padding: 14px 0; background: color-mix(in srgb, var(--c-bg) 85%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--c-border); }
+.home-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.25rem; color: var(--c-text); }
+.home-brand .brand-dot { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--c-primary), var(--c-secondary)); display: flex; align-items: center; justify-content: center; color: #fff; }
+.home-link { color: var(--c-text-muted); font-weight: 500; font-size: .92rem; }
+.home-link:hover { color: var(--c-primary); }
+
+.home-hero { padding: 72px 0 56px; background: radial-gradient(900px 420px at 80% -10%, color-mix(in srgb, var(--c-primary) 16%, transparent), transparent), radial-gradient(700px 380px at 0% 10%, color-mix(in srgb, var(--c-secondary) 14%, transparent), transparent); }
+.home-pill { display: inline-block; padding: 6px 14px; border-radius: 999px; font-size: .8rem; font-weight: 600; background: var(--c-surface); border: 1px solid var(--c-border); color: var(--c-text-muted); margin-bottom: 20px; }
+.home-title { font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 800; line-height: 1.1; letter-spacing: -.02em; }
+.home-gradient-text { background: linear-gradient(135deg, var(--c-primary), var(--c-secondary)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.home-lead { font-size: 1.1rem; color: var(--c-text-muted); max-width: 520px; margin-top: 18px; }
+
+.home-mock { padding: 24px; }
+.home-mini { background: var(--c-surface-alt); border-radius: var(--radius-md); padding: 12px; text-align: center; }
+.home-mini-val { font-weight: 800; font-size: 1.2rem; }
+.home-mini-lbl { font-size: .75rem; color: var(--c-text-muted); }
+.home-caption { font-size: .72rem; color: var(--c-text-muted); text-align: right; margin: 10px 0 0; }
+
+.home-section { padding: 80px 0; }
+.home-alt { background: var(--c-surface-alt); }
+.home-h2 { font-weight: 800; font-size: clamp(1.6rem, 3vw, 2.2rem); letter-spacing: -.01em; }
+
+.home-feature { padding: 28px; }
+.home-feature:hover { transform: translateY(-3px); }
+.home-feature-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; margin-bottom: 16px; }
+
+.home-step { width: 52px; height: 52px; margin: 0 auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; color: #fff; background: linear-gradient(135deg, var(--c-primary), var(--c-secondary)); }
+
+.home-checks { list-style: none; padding: 0; margin: 20px 0 0; }
+.home-checks li { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; }
+.home-checks i { color: var(--c-success); margin-top: 3px; }
+
+.home-cta { padding: 40px; color: #fff; border: none; background: linear-gradient(135deg, var(--c-primary), var(--c-secondary)); }
+
+.home-footer { padding: 48px 0 32px; border-top: 1px solid var(--c-border); }
+.home-crisis { display: flex; gap: 12px; padding: 16px 18px; border-radius: var(--radius-md); background: var(--c-surface-alt); border: 1px solid var(--c-border); font-size: .88rem; color: var(--c-text-muted); }
+.home-crisis i { color: var(--c-danger); font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+
+@media (max-width: 768px) { .home-hero { padding: 40px 0; } .home-section { padding: 56px 0; } }

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Your calm place for mental wellness{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+{% endblock %}
+
+{% block guest_content %}
+<!-- ============================ NAV ============================ -->
+<header class="home-nav">
+  <div class="home-container d-flex align-items-center justify-content-between">
+    <a href="{{ url_for('main.index') }}" class="home-brand">
+      <span class="brand-dot"><i class="bi bi-flower2"></i></span> Calmora
+    </a>
+    <nav class="d-none d-md-flex align-items-center gap-4">
+      <a href="#features" class="home-link">Features</a>
+      <a href="#how-it-works" class="home-link">How it works</a>
+      <a href="#privacy" class="home-link">Privacy</a>
+    </nav>
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-soft btn-sm" onclick="calmoraToggleTheme()" title="Toggle theme">
+        <i id="themeToggleIcon" class="bi bi-moon-stars"></i>
+      </button>
+      <a href="{{ url_for('auth.login') }}" class="btn btn-soft btn-sm d-none d-sm-inline-block">Log in</a>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Get started</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============================ HERO ============================ -->
+<section class="home-hero">
+  <div class="home-container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <span class="home-pill"><i class="bi bi-stars me-1"></i> Free to start · Private by design</span>
+        <h1 class="home-title">Understand your mind, <span class="home-gradient-text">one day at a time.</span></h1>
+        <p class="home-lead">
+          Calmora brings your moods, journal, symptoms, medications, therapy sessions and habits
+          into one calm space, then turns them into insights you can actually use.
+        </p>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4">Create free account</a>
+          <a href="{{ url_for('auth.login') }}" class="btn btn-soft btn-lg px-4">Try the demo</a>
+        </div>
+        <p class="small text-muted-soft mt-3 mb-0">Demo login: <strong>demo</strong> / Demo1234!</p>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="home-mock card-soft">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <strong>Mood trend · 14 days</strong>
+            <span class="mood-chip" style="background:#24C38C22;color:#24C38C;"><i class="bi bi-arrow-up-right"></i> Improving</span>
+          </div>
+          <svg viewBox="0 0 400 140" class="w-100" role="img" aria-label="Sample mood trend chart">
+            <defs>
+              <linearGradient id="g" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0" stop-color="#6C63FF" stop-opacity=".35"/>
+                <stop offset="1" stop-color="#6C63FF" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M0,100 C40,90 60,110 100,80 S160,60 200,70 260,40 300,50 360,25 400,30 L400,140 L0,140 Z" fill="url(#g)"/>
+            <path d="M0,100 C40,90 60,110 100,80 S160,60 200,70 260,40 300,50 360,25 400,30" fill="none" stroke="#6C63FF" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+          <div class="row g-2 mt-2">
+            <div class="col-4"><div class="home-mini"><div class="home-mini-val">4.2</div><div class="home-mini-lbl">Avg mood</div></div></div>
+            <div class="col-4"><div class="home-mini"><div class="home-mini-val">92%</div><div class="home-mini-lbl">Adherence</div></div></div>
+            <div class="col-4"><div class="home-mini"><div class="home-mini-val">🔥 12</div><div class="home-mini-lbl">Day streak</div></div></div>
+          </div>
+          <p class="home-caption">Sample data for illustration</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FEATURES ============================ -->
+<section id="features" class="home-section">
+  <div class="home-container">
+    <div class="text-center mb-5">
+      <h2 class="home-h2">Everything in one calm place</h2>
+      <p class="text-muted-soft">Six tools that work together, so patterns become visible.</p>
+    </div>
+    <div class="row g-4">
+      {% set features = [
+        ('bi-emoji-smile', '#6C63FF', 'Mood tracking', 'Log mood, intensity, stress and sleep in seconds and see how they connect.'),
+        ('bi-journal-richtext', '#00C2A8', 'Private journal', 'Write freely with tags and favorites. Search anything you have ever written.'),
+        ('bi-clipboard2-pulse', '#FF5A6E', 'Symptom monitoring', 'Track severity, duration and triggers to spot what sets symptoms off.'),
+        ('bi-capsule', '#FFB020', 'Medication management', 'Log doses and watch your adherence rate so nothing slips.'),
+        ('bi-people-fill', '#4C9AFF', 'Therapy appointments', 'Keep sessions, notes and reminders in one place, on a shared calendar.'),
+        ('bi-check2-circle', '#24C38C', 'Habit tracking', 'Build routines with one-tap check-ins, streaks and completion rates.')
+      ] %}
+      {% for icon, color, title, desc in features %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card-soft home-feature h-100">
+          <div class="home-feature-icon" style="background:{{ color }}22;color:{{ color }};"><i class="bi {{ icon }}"></i></div>
+          <h5 class="fw-bold">{{ title }}</h5>
+          <p class="text-muted-soft mb-0">{{ desc }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ============================ HOW IT WORKS ============================ -->
+<section id="how-it-works" class="home-section home-alt">
+  <div class="home-container">
+    <div class="text-center mb-5">
+      <h2 class="home-h2">Simple, from the first day</h2>
+    </div>
+    <div class="row g-4 text-center">
+      {% set steps = [
+        ('1', 'Check in', 'Spend a minute logging how you feel, or what you took, or what you did.'),
+        ('2', 'See patterns', 'Interactive charts and a unified calendar reveal trends across sleep, stress and mood.'),
+        ('3', 'Take action', 'Export reports as PDF, Excel or CSV to share with your therapist or doctor.')
+      ] %}
+      {% for n, title, desc in steps %}
+      <div class="col-md-4">
+        <div class="home-step">{{ n }}</div>
+        <h5 class="fw-bold mt-3">{{ title }}</h5>
+        <p class="text-muted-soft">{{ desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ============================ PRIVACY ============================ -->
+<section id="privacy" class="home-section">
+  <div class="home-container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <h2 class="home-h2">Your data stays yours</h2>
+        <p class="text-muted-soft">Mental health information is deeply personal. Calmora is built with that in mind.</p>
+        <ul class="home-checks">
+          <li><i class="bi bi-check-circle-fill"></i> Passwords are securely hashed, never stored in plain text</li>
+          <li><i class="bi bi-check-circle-fill"></i> Every record is scoped to your account only</li>
+          <li><i class="bi bi-check-circle-fill"></i> Export or delete your entries whenever you like</li>
+          <li><i class="bi bi-check-circle-fill"></i> Light and dark themes for comfortable late-night use</li>
+        </ul>
+      </div>
+      <div class="col-lg-6">
+        <div class="card-soft home-cta">
+          <h3 class="fw-bold">Ready to start?</h3>
+          <p class="mb-4">Create your free account in under a minute.</p>
+          <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-4 fw-semibold">Get started free</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FOOTER ============================ -->
+<footer class="home-footer">
+  <div class="home-container">
+    <div class="home-crisis">
+      <i class="bi bi-heart-pulse"></i>
+      <span><strong>Need urgent help?</strong> Calmora is a self-tracking tool, not a crisis service or a replacement for professional care.
+      If you may be in danger or thinking about harming yourself, contact your local emergency number or a crisis line right away.</span>
+    </div>
+    <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 small text-muted-soft">
+      <span>© {{ current_year }} Calmora</span>
+      <span>
+        <a href="{{ url_for('auth.login') }}" class="home-link me-3">Log in</a>
+        <a href="{{ url_for('auth.register') }}" class="home-link">Sign up</a>
+      </span>
+    </div>
+  </div>
+</footer>
+{% endblock %}

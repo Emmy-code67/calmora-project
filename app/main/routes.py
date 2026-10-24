@@ -23,7 +23,7 @@ main_bp = Blueprint("main", __name__, template_folder="../templates/main")
 def index():
     if current_user.is_authenticated:
         return redirect(url_for("main.dashboard"))
-    return redirect(url_for("auth.login"))
+    return render_template("main/home.html")
 
 
 @main_bp.route("/dashboard")
