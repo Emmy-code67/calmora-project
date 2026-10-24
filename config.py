@@ -34,7 +34,6 @@ class Config:
     SQLALCHEMY_DATABASE_URI = _normalize_db_url(
         os.environ.get(
             "DATABASE_URL",
-            f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'calmora.db')}",
         )
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
