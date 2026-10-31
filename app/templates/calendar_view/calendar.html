@@ -1,30 +1,38 @@
 {% extends "base.html" %}
 {% block title %}Calendar{% endblock %}
-{% block extra_css %}
-<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
-{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+<div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
   <div>
-    <h3 class="fw-bold mb-1"><i class="bi bi-calendar3 me-2"></i>Calendar</h3>
-    <p class="text-muted-soft mb-0">Every mood, journal entry, symptom, medication, and session in one view</p>
+    <h3 class="fw-bold">Calendar</h3>
+    <p class="text-muted-soft mb-0">Moods, journal entries, symptoms, sessions and habits in one view.</p>
   </div>
-  <div class="d-flex flex-wrap gap-2">
+  <ul class="legend list-unstyled mb-0">
     {% for type, color in event_colors.items() %}
-    <span class="small text-muted-soft"><span class="calendar-legend-dot" style="background:{{ color }};"></span>{{ type|capitalize }}</span>
+    <li><span class="calendar-legend-dot" style="background:{{ color }};"></span>{{ type|capitalize }}</li>
     {% endfor %}
-  </div>
+  </ul>
 </div>
 
-<div class="card-soft p-3">
+<div class="card-soft p-3 p-md-4">
+  <div class="d-md-none mb-3">
+    <label class="form-label" for="viewSelect">View</label>
+    <select id="viewSelect" class="form-select form-select-sm">
+      <option value="listWeek">Agenda (week)</option>
+      <option value="timeGridDay">Day</option>
+      <option value="timeGridWeek">Week</option>
+      <option value="dayGridMonth">Month</option>
+    </select>
+  </div>
   <div id="calmoraCalendar"></div>
 </div>
 
-<div class="modal fade" id="eventDetailModal" tabindex="-1">
+<div class="modal fade" id="eventDetailModal" tabindex="-1" aria-labelledby="eventModalTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="background: var(--c-surface); color: var(--c-text);">
-      <div class="modal-header"><h6 class="modal-title fw-bold" id="eventModalTitle">Event</h6>
-        <button class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" id="eventModalTitle">Event</h6>
+        <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
       <div class="modal-body" id="eventModalBody"></div>
     </div>
   </div>
@@ -32,27 +40,31 @@
 {% endblock %}
 
 {% block extra_js %}
+{# FullCalendar v6 injects its own styles, so there is no separate stylesheet to load #}
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  const calendarEl = document.getElementById('calmoraCalendar');
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+  const narrowQuery = window.matchMedia('(max-width: 767.98px)');
+  const select = document.getElementById('viewSelect');
 
-  const calendar = new FullCalendar.Calendar(calendarEl, {
-    initialView: 'dayGridMonth',
-    headerToolbar: {
-      left: 'prev,next today',
-      center: 'title',
-      right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-    },
+  // Phones get a compact toolbar and start on the agenda view, which reads best at that width.
+  const toolbarFor = (narrow) => narrow
+    ? { left: 'prev,next', center: 'title', right: 'today' }
+    : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek' };
+
+  const calendar = new FullCalendar.Calendar(document.getElementById('calmoraCalendar'), {
+    initialView: narrowQuery.matches ? 'listWeek' : 'dayGridMonth',
+    headerToolbar: toolbarFor(narrowQuery.matches),
     height: 'auto',
     editable: true,
+    longPressDelay: 350,          // drag by long-press on touch screens
+    eventLongPressDelay: 350,
     dayMaxEvents: 3,
-    events: function (info, successCallback, failureCallback) {
+    nowIndicator: true,
+    events: function (info, success, failure) {
       fetch(`{{ url_for('calendar_view.events_feed') }}?start=${info.startStr}&end=${info.endStr}`)
-        .then(res => res.json())
-        .then(data => successCallback(data))
-        .catch(err => failureCallback(err));
+        .then(r => r.json()).then(success).catch(failure);
     },
     eventClick: function (info) {
       const props = info.event.extendedProps;
@@ -64,20 +76,25 @@ document.addEventListener('DOMContentLoaded', function () {
       new bootstrap.Modal(document.getElementById('eventDetailModal')).show();
     },
     eventDrop: function (info) {
-      const props = info.event.extendedProps;
-      if (!props.editable) { info.revert(); return; }
+      if (!info.event.extendedProps.editable) { info.revert(); return; }
       const [type, id] = info.event.id.split('-');
       fetch(`/calendar/events/${type}/${id}/move`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
         body: JSON.stringify({ date: info.event.startStr })
-      }).then(res => res.json()).then(data => {
-        if (!data.success) info.revert();
-      }).catch(() => info.revert());
-    }
+      }).then(r => r.json()).then(d => { if (!d.success) info.revert(); }).catch(() => info.revert());
+    },
+    datesSet: function (arg) { if (select) select.value = arg.view.type; }
   });
-
   calendar.render();
+
+  if (select) select.addEventListener('change', () => calendar.changeView(select.value));
+
+  // When the window crosses the phone breakpoint, swap the toolbar and a sensible view
+  narrowQuery.addEventListener('change', (e) => {
+    calendar.setOption('headerToolbar', toolbarFor(e.matches));
+    calendar.changeView(e.matches ? 'listWeek' : 'dayGridMonth');
+  });
 });
 </script>
 {% endblock %}

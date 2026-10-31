@@ -1,169 +1,109 @@
 {% extends "base.html" %}
-{% block title %}Your calm place for mental wellness{% endblock %}
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
-{% endblock %}
+{% block title %}Track mood, sleep, symptoms and therapy{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">{% endblock %}
 
 {% block guest_content %}
-<!-- ============================ NAV ============================ -->
-<header class="home-nav">
-  <div class="home-container d-flex align-items-center justify-content-between">
-    <a href="{{ url_for('main.index') }}" class="home-brand">
-      <span class="brand-dot"><i class="bi bi-flower2"></i></span> Calmora
-    </a>
-    <nav class="d-none d-md-flex align-items-center gap-4">
-      <a href="#features" class="home-link">Features</a>
-      <a href="#how-it-works" class="home-link">How it works</a>
-      <a href="#privacy" class="home-link">Privacy</a>
-    </nav>
-    <div class="d-flex align-items-center gap-2">
-      <button class="btn btn-soft btn-sm" onclick="calmoraToggleTheme()" title="Toggle theme">
-        <i id="themeToggleIcon" class="bi bi-moon-stars"></i>
-      </button>
-      <a href="{{ url_for('auth.login') }}" class="btn btn-soft btn-sm d-none d-sm-inline-block">Log in</a>
-      <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Get started</a>
+<div class="home">
+  <header class="home-nav">
+    <div class="wrap d-flex align-items-center justify-content-between">
+      <a href="{{ url_for('main.index') }}" class="wordmark" style="padding:0;">Calmora</a>
+      <nav class="d-flex align-items-center gap-4" aria-label="Site">
+        <a href="#features" class="home-link d-none d-md-inline">What you can track</a>
+        <a href="#privacy" class="home-link d-none d-md-inline">Privacy</a>
+        <button class="icon-btn" onclick="calmoraToggleTheme()" title="Switch theme" aria-label="Switch theme"><i id="themeToggleIcon" class="bi bi-moon"></i></button>
+        <a href="{{ url_for('auth.login') }}" class="home-link">Log in</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Create account</a>
+      </nav>
     </div>
-  </div>
-</header>
+  </header>
 
-<!-- ============================ HERO ============================ -->
-<section class="home-hero">
-  <div class="home-container">
-    <div class="row align-items-center g-5">
-      <div class="col-lg-6">
-        <span class="home-pill"><i class="bi bi-stars me-1"></i> Free to start · Private by design</span>
-        <h1 class="home-title">Understand your mind, <span class="home-gradient-text">one day at a time.</span></h1>
-        <p class="home-lead">
-          Calmora brings your moods, journal, symptoms, medications, therapy sessions and habits
-          into one calm space, then turns them into insights you can actually use.
-        </p>
-        <div class="d-flex flex-wrap gap-2 mt-4">
-          <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4">Create free account</a>
-          <!-- <a href="{{ url_for('auth.login') }}" class="btn btn-soft btn-lg px-4">Try the demo</a> -->
-        </div>
-        <!-- <p class="small text-muted-soft mt-3 mb-0">Demo login: <strong>demo</strong> / Demo1234!</p> -->
-      </div>
-
-      <div class="col-lg-6">
-        <div class="home-mock card-soft">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <strong>Mood trend · 14 days</strong>
-            <span class="mood-chip" style="background:#24C38C22;color:#24C38C;"><i class="bi bi-arrow-up-right"></i> Improving</span>
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div class="hero-top">
+          <h1>See what moves your mood.</h1>
+          <div class="hero-side">
+            <p>Calmora keeps your mood, sleep, symptoms, medication and therapy sessions in one place, so patterns are easy to spot and easy to bring to your next appointment.</p>
+            <div class="d-flex flex-wrap gap-2">
+              <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Create an account</a>
+              <a href="{{ url_for('auth.login') }}" class="btn btn-soft btn-lg">Log in</a>
+            </div>
+            <p class="hero-note"><a href="{{ url_for('auth.login') }}">Look around with the demo account</a></p>
           </div>
-          <svg viewBox="0 0 400 140" class="w-100" role="img" aria-label="Sample mood trend chart">
-            <defs>
-              <linearGradient id="g" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0" stop-color="#6C63FF" stop-opacity=".35"/>
-                <stop offset="1" stop-color="#6C63FF" stop-opacity="0"/>
-              </linearGradient>
-            </defs>
-            <path d="M0,100 C40,90 60,110 100,80 S160,60 200,70 260,40 300,50 360,25 400,30 L400,140 L0,140 Z" fill="url(#g)"/>
-            <path d="M0,100 C40,90 60,110 100,80 S160,60 200,70 260,40 300,50 360,25 400,30" fill="none" stroke="#6C63FF" stroke-width="3" stroke-linecap="round"/>
-          </svg>
-          <div class="row g-2 mt-2">
-            <div class="col-4"><div class="home-mini"><div class="home-mini-val">4.2</div><div class="home-mini-lbl">Avg mood</div></div></div>
-            <div class="col-4"><div class="home-mini"><div class="home-mini-val">92%</div><div class="home-mini-lbl">Adherence</div></div></div>
-            <div class="col-4"><div class="home-mini"><div class="home-mini-val">🔥 12</div><div class="home-mini-lbl">Day streak</div></div></div>
-          </div>
-          <p class="home-caption">Sample data for illustration</p>
+        </div>
+
+        <figure class="hero-chart">
+<svg viewBox="0 0 1200 320" role="img" aria-labelledby="hc-title" preserveAspectRatio="none">
+  <title id="hc-title">Example mood scores over 30 days. The line dips early in the month and trends upward.</title>
+  <g class="grid"><line x1="0" x2="1200" y1="70" y2="70"/><line x1="0" x2="1200" y1="160" y2="160"/><line x1="0" x2="1200" y1="250" y2="250"/></g>
+  <line class="usual" x1="0" x2="1200" y1="130.5" y2="130.5"/>
+  <text class="axis" x="1200" y="150.5" text-anchor="end">Your usual</text>
+  <path class="line" pathLength="1" d="M12.0,154.0 C18.8,151.0 39.0,135.5 52.6,136.0 C66.1,136.5 79.6,151.0 93.1,157.0 C106.6,163.0 120.1,171.0 133.7,172.0 C147.2,173.0 160.7,157.0 174.2,163.0 C187.7,169.0 201.2,203.0 214.8,208.0 C228.3,213.0 241.8,200.0 255.3,193.0 C268.8,186.0 282.3,171.5 295.9,166.0 C309.4,160.5 322.9,164.0 336.4,160.0 C349.9,156.0 363.4,143.0 377.0,142.0 C390.5,141.0 404.0,155.5 417.5,154.0 C431.0,152.5 444.6,139.0 458.1,133.0 C471.6,127.0 485.1,119.0 498.6,118.0 C512.1,117.0 525.7,122.5 539.2,127.0 C552.7,131.5 566.2,144.0 579.7,145.0 C593.2,146.0 606.8,137.0 620.3,133.0 C633.8,129.0 647.3,121.5 660.8,121.0 C674.3,120.5 687.9,132.5 701.4,130.0 C714.9,127.5 728.4,108.5 741.9,106.0 C755.4,103.5 769.0,112.0 782.5,115.0 C796.0,118.0 809.5,126.0 823.0,124.0 C836.6,122.0 850.1,108.5 863.6,103.0 C877.1,97.5 890.6,91.5 904.1,91.0 C917.7,90.5 931.2,96.5 944.7,100.0 C958.2,103.5 971.7,112.5 985.2,112.0 C998.8,111.5 1012.3,101.0 1025.8,97.0 C1039.3,93.0 1052.8,87.5 1066.3,88.0 C1079.9,88.5 1093.4,101.0 1106.9,100.0 C1120.4,99.0 1133.9,84.5 1147.4,82.0 C1161.0,79.5 1181.2,84.5 1188.0,85.0"/>
+  <g class="note"><line x1="214.8" y1="44" x2="214.8" y2="198.0"/><circle cx="214.8" cy="208.0" r="3.5" class="note-dot"/><text x="223.8" y="40">Slept 5 hours</text></g>
+<g class="note"><line x1="498.6" y1="44" x2="498.6" y2="108.0"/><circle cx="498.6" cy="118.0" r="3.5" class="note-dot"/><text x="507.6" y="40">Therapy session</text></g>
+<g class="note"><line x1="904.1" y1="44" x2="904.1" y2="81.0"/><circle cx="904.1" cy="91.0" r="3.5" class="note-dot"/><text x="913.1" y="40">Started a daily walk</text></g>
+  <circle class="now-ring" cx="1188.0" cy="85.0" r="11"/>
+  <circle class="now" cx="1188.0" cy="85.0" r="5"/>
+  <g><text class="axis" x="12.0" y="306">Week 1</text><text class="axis" x="295.9" y="306">Week 2</text><text class="axis" x="579.7" y="306">Week 3</text><text class="axis" x="863.6" y="306">Week 4</text><text class="axis" x="1188.0" y="306" text-anchor="end">Today</text></g>
+</svg>
+          <figcaption>Example data. Your own month appears here after a few check-ins.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="features" class="block">
+      <div class="wrap split">
+        <h2>What you can track</h2>
+        <dl class="ruled">
+          <div><dt>Mood</dt><dd>Rate how you feel, how stressed you are and how long you slept. It takes about a minute.</dd></div>
+          <div><dt>Journal</dt><dd>Write freely, add tags, and search everything you've written.</dd></div>
+          <div><dt>Symptoms</dt><dd>Note what happened, how severe it was and what might have triggered it.</dd></div>
+          <div><dt>Medication</dt><dd>Log each dose as taken, missed or skipped, and see how consistent you are over time.</dd></div>
+          <div><dt>Therapy</dt><dd>Keep appointments and notes together, with reminders and a calendar view.</dd></div>
+          <div><dt>Habits</dt><dd>Check in once a day and watch your streaks and completion rate build.</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="block block-tint">
+      <div class="wrap">
+        <h2 class="mb-5">How it works</h2>
+        <div class="steps">
+          <div><h3>Check in</h3><p>Log what you want, when you want. Nothing is required every day.</p></div>
+          <div><h3>Review</h3><p>Charts and a calendar show how sleep, stress and mood move together.</p></div>
+          <div><h3>Share</h3><p>Export a report as PDF, Excel or CSV for your therapist or doctor.</p></div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- ============================ FEATURES ============================ -->
-<section id="features" class="home-section">
-  <div class="home-container">
-    <div class="text-center mb-5">
-      <h2 class="home-h2">Everything in one calm place</h2>
-      <p class="text-muted-soft">Six tools that work together, so patterns become visible.</p>
-    </div>
-    <div class="row g-4">
-      {% set features = [
-        ('bi-emoji-smile', '#6C63FF', 'Mood tracking', 'Log mood, intensity, stress and sleep in seconds and see how they connect.'),
-        ('bi-journal-richtext', '#00C2A8', 'Private journal', 'Write freely with tags and favorites. Search anything you have ever written.'),
-        ('bi-clipboard2-pulse', '#FF5A6E', 'Symptom monitoring', 'Track severity, duration and triggers to spot what sets symptoms off.'),
-        ('bi-capsule', '#FFB020', 'Medication management', 'Log doses and watch your adherence rate so nothing slips.'),
-        ('bi-people-fill', '#4C9AFF', 'Therapy appointments', 'Keep sessions, notes and reminders in one place, on a shared calendar.'),
-        ('bi-check2-circle', '#24C38C', 'Habit tracking', 'Build routines with one-tap check-ins, streaks and completion rates.')
-      ] %}
-      {% for icon, color, title, desc in features %}
-      <div class="col-md-6 col-lg-4">
-        <div class="card-soft home-feature h-100">
-          <div class="home-feature-icon" style="background:{{ color }}22;color:{{ color }};"><i class="bi {{ icon }}"></i></div>
-          <h5 class="fw-bold">{{ title }}</h5>
-          <p class="text-muted-soft mb-0">{{ desc }}</p>
-        </div>
+    <section id="privacy" class="block">
+      <div class="wrap split">
+        <h2>Your records are yours</h2>
+        <dl class="ruled ruled-plain">
+          <div><dd>Passwords are hashed and never stored in plain text.</dd></div>
+          <div><dd>Each entry belongs to your account and isn't shown to other users.</dd></div>
+          <div><dd>You can export your data whenever you like.</dd></div>
+          <div><dd>You can edit or delete any entry at any time.</dd></div>
+        </dl>
       </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- ============================ HOW IT WORKS ============================ -->
-<section id="how-it-works" class="home-section home-alt">
-  <div class="home-container">
-    <div class="text-center mb-5">
-      <h2 class="home-h2">Simple, from the first day</h2>
-    </div>
-    <div class="row g-4 text-center">
-      {% set steps = [
-        ('1', 'Check in', 'Spend a minute logging how you feel, or what you took, or what you did.'),
-        ('2', 'See patterns', 'Interactive charts and a unified calendar reveal trends across sleep, stress and mood.'),
-        ('3', 'Take action', 'Export reports as PDF, Excel or CSV to share with your therapist or doctor.')
-      ] %}
-      {% for n, title, desc in steps %}
-      <div class="col-md-4">
-        <div class="home-step">{{ n }}</div>
-        <h5 class="fw-bold mt-3">{{ title }}</h5>
-        <p class="text-muted-soft">{{ desc }}</p>
+    <section class="closing">
+      <div class="wrap d-flex flex-wrap align-items-center justify-content-between gap-4">
+        <h2>Start with one check-in.</h2>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Create an account</a>
       </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
+    </section>
+  </main>
 
-<!-- ============================ PRIVACY ============================ -->
-<section id="privacy" class="home-section">
-  <div class="home-container">
-    <div class="row align-items-center g-5">
-      <div class="col-lg-6">
-        <h2 class="home-h2">Your data stays yours</h2>
-        <p class="text-muted-soft">Mental health information is deeply personal. Calmora is built with that in mind.</p>
-        <ul class="home-checks">
-          <li><i class="bi bi-check-circle-fill"></i> Passwords are securely hashed, never stored in plain text</li>
-          <li><i class="bi bi-check-circle-fill"></i> Every record is scoped to your account only</li>
-          <li><i class="bi bi-check-circle-fill"></i> Export or delete your entries whenever you like</li>
-          <li><i class="bi bi-check-circle-fill"></i> Light and dark themes for comfortable late-night use</li>
-        </ul>
-      </div>
-      <div class="col-lg-6">
-        <div class="card-soft home-cta">
-          <h3 class="fw-bold">Ready to start?</h3>
-          <p class="mb-4">Create your free account in under a minute.</p>
-          <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-4 fw-semibold">Get started free</a>
-        </div>
+  <footer class="home-footer">
+    <div class="wrap">
+      <p class="crisis">Calmora is a self-tracking tool. It isn't a crisis service and doesn't replace professional care. If you might be in danger or thinking about harming yourself, contact your local emergency number or a crisis line now.</p>
+      <div class="d-flex flex-wrap justify-content-between gap-3 small text-muted-soft">
+        <span>© {{ current_year }} Calmora</span>
+        <span><a href="{{ url_for('auth.login') }}" class="me-3">Log in</a><a href="{{ url_for('auth.register') }}">Create account</a></span>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- ============================ FOOTER ============================ -->
-<footer class="home-footer">
-  <div class="home-container">
-    <div class="home-crisis">
-      <i class="bi bi-heart-pulse"></i>
-      <span><strong>Need urgent help?</strong> Calmora is a self-tracking tool, not a crisis service or a replacement for professional care.
-      If you may be in danger or thinking about harming yourself, contact your local emergency number or a crisis line right away.</span>
-    </div>
-    <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 small text-muted-soft">
-      <span>© {{ current_year }} Calmora</span>
-      <span>
-        <a href="{{ url_for('auth.login') }}" class="home-link me-3">Log in</a>
-        <a href="{{ url_for('auth.register') }}" class="home-link">Sign up</a>
-      </span>
-    </div>
-  </div>
-</footer>
+  </footer>
+</div>
 {% endblock %}
